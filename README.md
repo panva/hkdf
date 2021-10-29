@@ -18,7 +18,7 @@ The given `ikm`, `salt` and `info` are used with the `digest` to derive a key of
 | `ikm` | `Uint8Array` \| `string` | The input keying material. It must be at least one byte in length. |
 | `salt` | `Uint8Array` \| `string` | The salt value. Must be provided but can be zero-length. |
 | `info` | `Uint8Array` \| `string` | Additional info value. Must be provided but can be zero-length, and cannot be more than 1024 bytes. |
-| `keylen` | `number` | The length in bytes of the key to generate. Must be greater than 0. |
+| `keylen` | `number` | The length in bytes of the key to generate. Must be greater than 0 and no more than 255 times the digest size. |
 
 ### Returns
 

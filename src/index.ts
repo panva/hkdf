@@ -33,11 +33,14 @@ function normalizeInfo(input: unknown) {
   return info
 }
 
-function normalizeLength(input: unknown) {
+function normalizeKeylen(input: unknown, digest: string) {
   if (typeof input !== 'number' || !Number.isInteger(input) || input < 1) {
     throw new TypeError('"keylen" must be a positive integer')
   }
-
+  const hashlen = parseInt(digest.substr(3), 10) >> 3 || 20
+  if (input > 255 * hashlen) {
+    throw new TypeError('"keylen" too large')
+  }
   return input
 }
 
@@ -50,7 +53,7 @@ function normalizeLength(input: unknown) {
  * @param ikm The input keying material. It must be at least one byte in length.
  * @param salt The salt value. Must be provided but can be zero-length.
  * @param info Additional info value. Must be provided but can be zero-length, and cannot be more than 1024 bytes.
- * @param keylen The length in bytes of the key to generate. Must be greater than 0.
+ * @param keylen The length in bytes of the key to generate. Must be greater than 0 and no more than 255 times the digest size.
  */
 async function hkdf(
   digest: 'sha256' | 'sha384' | 'sha512' | 'sha1' | string,
@@ -64,7 +67,7 @@ async function hkdf(
     normalizeIkm(ikm),
     normalizeUint8Array(salt, 'salt'),
     normalizeInfo(info),
-    normalizeLength(keylen),
+    normalizeKeylen(keylen, digest),
   )
 }
 

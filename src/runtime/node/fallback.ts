@@ -12,8 +12,6 @@ export default (
     .update(ikm)
     .digest()
 
-  if (keylen > 255 * hashlen) throw new Error('invalid "keylen"')
-
   // T(0) = empty
   // T(1) = HMAC(PRK, T(0) | info | 0x01)
   // T(2) = HMAC(PRK, T(1) | info | 0x02)
