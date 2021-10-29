@@ -1,6 +1,6 @@
 {
   "name": "@panva/hkdf",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "HKDF with no dependencies using runtime's native crypto",
   "keywords": [
     "browser",
