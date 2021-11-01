@@ -26,21 +26,22 @@ The given `ikm`, `salt` and `info` are used with the `digest` to derive a key of
 
 ### Example
 
+**`example`** ESM import
 ```js
-// ESM
 import hkdf from '@panva/hkdf'
 ```
 
+**`example`** CJS import
 ```js
-// CJS
 const { hkdf } = require('@panva/hkdf')
 ```
 
+**`example`** Deno import
 ```js
-// Deno
 import hkdf from 'https://deno.land/x/hkdf/index.ts'
 ```
 
+**`example`** Usage
 ```js
 const derivedKey = await hkdf(
   'sha256',
