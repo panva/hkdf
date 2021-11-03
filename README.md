@@ -58,6 +58,7 @@ const derivedKey = await hkdf(
 - Cloudflare Workers
 - Deno
 - Electron
+- Next.js Middleware / Vercel Edge Functions
 - Node.js
 
 [RFC 5869]: https://www.rfc-editor.org/rfc/rfc5869.html
