@@ -52,13 +52,21 @@ const derivedKey = await hkdf(
 )
 ```
 
-## Supported Runtimes, Environments, Platforms
+## Supported Runtimes
 
-- Browsers
-- Cloudflare Workers
-- Deno
-- Electron
-- Next.js Middleware / Vercel Edge Functions
-- Node.js
+The supported JavaScript runtimes include ones that
+
+- are reasonably up to date ECMAScript
+- support the utilized Web API globals and standard built-in objects
+- These are
+  - _(This is not an exhaustive list)_
+  - Browsers
+  - Cloudflare Workers
+  - Deno
+  - Electron
+  - Netlify Edge Functions
+  - Next.js Middlewares
+  - Node.js
+  - Vercel Edge Functions
 
 [RFC 5869]: https://www.rfc-editor.org/rfc/rfc5869.html
