@@ -2,17 +2,8 @@ name: Continuous Integration
 
 on:
   push:
-    paths-ignore:
-      - "**.md"
-      - "tools/**"
   pull_request:
-    paths-ignore:
-      - "**.md"
-      - "tools/**"
   pull_request_target:
-    paths-ignore:
-      - "**.md"
-      - "tools/**"
     types:
       - labeled
 
@@ -35,51 +26,38 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v3
         with:
-          node-version: 14
+          node-version: lts/hydrogen # 18
           check-latest: true
-      - name: Store node version variable
-        id: node
-        run: |
-          echo "::set-output name=version::$(node -v)"
-      - name: Cache node_modules
-        uses: actions/cache@v3
-        id: node_modules
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-node_modules-${{ hashFiles('package.json') }}-${{ steps.node.outputs.version }}
+          cache: 'npm'
       - name: Install dependencies
-        run: npx panva/npm-install-retry
-        if: ${{ steps.node_modules.outputs.cache-hit != 'true' }}
+        run: npm clean-install
       - name: Cache dist
         uses: actions/cache@v3
         id: dist
         with:
           path: dist
-          key: dist-${{ hashFiles('src/**/*.ts') }}-${{ hashFiles('tsconfig/*.json') }}-${{ hashFiles('.github/workflows/*.yml') }}-${{ hashFiles('package.json') }}
-      - run: sed -i -e "s/-i ''/-i/g" package.json
-      - run: sed -i -e "s/gcp/cp/g" package.json
+          key: dist-${{ hashFiles('src/**/*.ts', 'tsconfig/*.json', '.github/workflows/*.yml', 'package.json') }}
       - name: Build
-        run: npm run build-all
+        run: |
+          sed -i -e "s/-i ''/-i/g" package.json
+          sed -i -e "s/gcp/cp/g" package.json
+          npm run build-all
         if: ${{ steps.dist.outputs.cache-hit != 'true' }}
       - run: git reset HEAD --hard
 
   test:
     needs:
       - build
-    continue-on-error: ${{ matrix.experimental || false }}
+    continue-on-error: ${{ !startsWith(matrix.node-version, 'lts') }}
     strategy:
       fail-fast: false
       matrix:
         node-version:
-          - 12.20.0
-          - 12
-          - 14.15.0
-          - 14
-          - 16.13.0
-          - 16
-        include:
-          - experimental: true
-            node-version: '>=17'
+          - lts/erbium # 12
+          - lts/fermium # 14
+          - lts/gallium # 16
+          - lts/hydrogen # 18
+          - current
 
     runs-on: ubuntu-latest
     steps:
@@ -90,50 +68,44 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           check-latest: true
-      - name: Store node version variable
-        id: node
-        run: |
-          echo "::set-output name=version::$(node -v)"
-      - name: Cache node_modules
-        uses: actions/cache@v3
-        id: node_modules
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-node_modules-${{ hashFiles('package.json') }}-${{ steps.node.outputs.version }}
       - name: Install dependencies
-        run: npx panva/npm-install-retry
-        if: ${{ steps.node_modules.outputs.cache-hit != 'true' }}
+        run: npm clean-install
       - name: Load cached dist
         uses: actions/cache@v3
         id: dist
         with:
           path: dist
-          key: dist-${{ hashFiles('src/**/*.ts') }}-${{ hashFiles('tsconfig/*.json') }}-${{ hashFiles('.github/workflows/*.yml') }}-${{ hashFiles('package.json') }}
+          key: dist-${{ hashFiles('src/**/*.ts', 'tsconfig/*.json', '.github/workflows/*.yml', 'package.json') }}
+      - name: Abort if dist isn't cached
+        if: ${{ steps.dist.outputs.cache-hit != 'true' }}
+        uses: actions/github-script@v6
+        with:
+          script: |
+              core.setFailed('dist cache hit failed')
       - run: npm run test
 
   test-deno:
     needs:
       - build
-    strategy:
-      fail-fast: false
-      matrix:
-        deno-version:
-          - v1.14.0
-          - v1.x
-
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v3
       - uses: denoland/setup-deno@v1
         with:
-          deno-version: ${{ matrix.deno-version }}
+          deno-version: v1.x
       - name: Load cached dist
         uses: actions/cache@v3
         id: dist
         with:
           path: dist
-          key: dist-${{ hashFiles('src/**/*.ts') }}-${{ hashFiles('tsconfig/*.json') }}-${{ hashFiles('.github/workflows/*.yml') }}-${{ hashFiles('package.json') }}
+          key: dist-${{ hashFiles('src/**/*.ts', 'tsconfig/*.json', '.github/workflows/*.yml', 'package.json') }}
+      - name: Abort if dist isn't cached
+        if: ${{ steps.dist.outputs.cache-hit != 'true' }}
+        uses: actions/github-script@v6
+        with:
+          script: |
+              core.setFailed('dist cache hit failed')
       - name: Test Deno Definitions
         run: npm run test-deno -- --no-run
       - name: Test Deno
@@ -156,26 +128,23 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v3
         with:
-          node-version: 16
-      - name: Store node version variable
-        id: node
-        run: |
-          echo "::set-output name=version::$(node -v)"
-      - name: Cache node_modules
-        uses: actions/cache@v3
-        id: node_modules
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-node_modules-${{ hashFiles('package.json') }}-${{ steps.node.outputs.version }}
+          node-version: lts/hydrogen # 18
+          check-latest: true
+          cache: 'npm'
       - name: Install dependencies
-        run: npx panva/npm-install-retry
-        if: ${{ steps.node_modules.outputs.cache-hit != 'true' }}
+        run: npm clean-install
       - name: Load cached dist
         uses: actions/cache@v3
         id: dist
         with:
           path: dist
-          key: dist-${{ hashFiles('src/**/*.ts') }}-${{ hashFiles('tsconfig/*.json') }}-${{ hashFiles('.github/workflows/*.yml') }}-${{ hashFiles('package.json') }}
+          key: dist-${{ hashFiles('src/**/*.ts', 'tsconfig/*.json', '.github/workflows/*.yml', 'package.json') }}
+      - name: Abort if dist isn't cached
+        if: ${{ steps.dist.outputs.cache-hit != 'true' }}
+        uses: actions/github-script@v6
+        with:
+          script: |
+              core.setFailed('dist cache hit failed')
       - name: Test Cloudflare Workers
         run: npm run test-cloudflare-workers
         env:
@@ -186,11 +155,6 @@ jobs:
   test-electron:
     needs:
       - build
-    strategy:
-      matrix:
-        electron-version:
-          - 12.0.0
-          - latest
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -198,29 +162,25 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v3
         with:
-          node-version: 14
+          node-version: lts/hydrogen # 18
           check-latest: true
-      - name: Store node version variable
-        id: node
-        run: |
-          echo "::set-output name=version::$(node -v)"
-      - name: Cache node_modules
-        uses: actions/cache@v3
-        id: node_modules
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-node_modules-${{ hashFiles('package.json') }}-${{ steps.node.outputs.version }}
+          cache: 'npm'
       - name: Install dependencies
-        run: npx panva/npm-install-retry
-        if: ${{ steps.node_modules.outputs.cache-hit != 'true' }}
+        run: npm clean-install
       - name: Load cached dist
         uses: actions/cache@v3
         id: dist
         with:
           path: dist
-          key: dist-${{ hashFiles('src/**/*.ts') }}-${{ hashFiles('tsconfig/*.json') }}-${{ hashFiles('.github/workflows/*.yml') }}-${{ hashFiles('package.json') }}
+          key: dist-${{ hashFiles('src/**/*.ts', 'tsconfig/*.json', '.github/workflows/*.yml', 'package.json') }}
+      - name: Abort if dist isn't cached
+        if: ${{ steps.dist.outputs.cache-hit != 'true' }}
+        uses: actions/github-script@v6
+        with:
+          script: |
+              core.setFailed('dist cache hit failed')
       - name: Install Electron
-        run: npm install --global xvfb-maybe electron@${{ matrix.electron-version }}
+        run: npm install --global xvfb-maybe electron@latest
       - name: Test Electron crypto
         run: xvfb-maybe electron ./test/.electron
       - run: git reset HEAD --hard
@@ -243,26 +203,21 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v3
         with:
-          node-version: 14
-      - name: Store node version variable
-        id: node
-        run: |
-          echo "::set-output name=version::$(node -v)"
-      - name: Cache node_modules
-        uses: actions/cache@v3
-        id: node_modules
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-node_modules-${{ hashFiles('package.json') }}-${{ steps.node.outputs.version }}
+          node-version: lts/hydrogen # 18
       - name: Install dependencies
-        run: npx panva/npm-install-retry
-        if: ${{ steps.node_modules.outputs.cache-hit != 'true' }}
+        run: npm clean-install
       - name: Load cached dist
         uses: actions/cache@v3
         id: dist
         with:
           path: dist
-          key: dist-${{ hashFiles('src/**/*.ts') }}-${{ hashFiles('tsconfig/*.json') }}-${{ hashFiles('.github/workflows/*.yml') }}-${{ hashFiles('package.json') }}
+          key: dist-${{ hashFiles('src/**/*.ts', 'tsconfig/*.json', '.github/workflows/*.yml', 'package.json') }}
+      - name: Abort if dist isn't cached
+        if: ${{ steps.dist.outputs.cache-hit != 'true' }}
+        uses: actions/github-script@v6
+        with:
+          script: |
+              core.setFailed('dist cache hit failed')
       - run: npx retry-cli npm run test-browsers
       - run: git reset HEAD --hard
 
@@ -283,7 +238,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v3
         with:
-          node-version: 14
+          node-version: lts/hydrogen # 18
       - run: node tools/release-notes
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
