@@ -74,7 +74,7 @@
   "devDependencies": {
     "@types/node": "^16.11.1",
     "ava": "^3.15.0",
-    "esbuild": "^0.13.8",
+    "esbuild": "^0.15.12",
     "glob": "^7.1.7",
     "got": "^11.8.2",
     "karma": "^6.3.4",
