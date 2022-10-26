@@ -1,6 +1,7 @@
 {
   "extends": "./base.json",
   "compilerOptions": {
+    "types": ["node"],
     "target": "ES2019",
     "module": "ES2020",
     "outDir": "../dist/node/esm"
