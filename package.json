@@ -64,27 +64,16 @@
     "runtime:find": "find src/runtime -not -name '*.d.ts' -maxdepth 1 -type f -print0",
     "types:find": "find dist/types -name '*.d.ts' -type f -print0",
     "runtime:node:copy": "cp ./src/runtime/node/*.ts ./src/runtime",
-    "test": "npm run-script test-cjs && ava",
-    "test-cloudflare-workers": "ava --timeout=5m --config ./test-cloudflare-workers.config.cjs",
+    "test": "ava",
     "test-deno": "deno test --reload --jobs --allow-net --allow-read test-deno",
-    "test-browsers": "find test-browser -type f -name '*.js' -print0 | xargs -0 npx esbuild --log-level=warning --outdir=dist-browser-tests --bundle && karma start",
-    "test-cjs": "rm -rf test/cjs && find test -type f -name '*.mjs' -print0 | xargs -0 npx esbuild --log-level=warning --target=esnext --outdir=test/cjs --format=cjs",
     "prettier": "npx prettier --loglevel silent --write ./test ./src ./tools ./test-browser ./test-deno ./test-cloudflare-workers"
   },
   "devDependencies": {
     "@types/node": "^16.11.1",
     "ava": "^3.15.0",
     "esbuild": "^0.15.12",
-    "glob": "^7.1.7",
-    "got": "^11.8.2",
-    "karma": "^6.3.4",
-    "karma-browserstack-launcher": "1.6.0",
-    "karma-qunit": "^4.1.2",
-    "karma-summary-reporter": "^3.0.0",
     "npm-run-all": "^4.1.5",
-    "p-throttle": "^5.0.0",
     "prettier": "^2.4.1",
-    "qunit": "^2.17.2",
     "tar": "^6.1.11",
     "typescript": "^4.4.3"
   }

@@ -3,21 +3,8 @@ name: Continuous Integration
 on:
   push:
   pull_request:
-  pull_request_target:
-    types:
-      - labeled
 
 jobs:
-  unlabel:
-    if: ${{ github.event_name == 'pull_request_target' && github.event.label.name == 'full-ci' }}
-    runs-on: ubuntu-latest
-    steps:
-      - run: gh pr edit $PR --repo $REPO --remove-label "full-ci"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PR: ${{ github.event.number }}
-          REPO: ${{ github.event.repository.full_name }}
-
   build:
     runs-on: ubuntu-latest
     steps:
@@ -53,7 +40,6 @@ jobs:
       fail-fast: false
       matrix:
         node-version:
-          - lts/erbium # 12
           - lts/fermium # 14
           - lts/gallium # 16
           - lts/hydrogen # 18
@@ -112,46 +98,6 @@ jobs:
         run: npm run test-deno -- --no-check
       - run: git reset HEAD --hard
 
-  test-cloudflare:
-    concurrency: test-cloudflare
-    if: ${{ !startsWith(github.event_name, 'pull_request') || (github.event_name == 'pull_request_target' && github.event.label.name == 'full-ci') }}
-    needs:
-      - build
-
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - uses: denoland/setup-deno@v1
-        with:
-          deno-version: v1.x
-      - name: Setup node
-        uses: actions/setup-node@v3
-        with:
-          node-version: lts/hydrogen # 18
-          check-latest: true
-          cache: 'npm'
-      - name: Install dependencies
-        run: npm clean-install
-      - name: Load cached dist
-        uses: actions/cache@v3
-        id: dist
-        with:
-          path: dist
-          key: dist-${{ hashFiles('src/**/*.ts', 'tsconfig/*.json', '.github/workflows/*.yml', 'package.json') }}
-      - name: Abort if dist isn't cached
-        if: ${{ steps.dist.outputs.cache-hit != 'true' }}
-        uses: actions/github-script@v6
-        with:
-          script: |
-              core.setFailed('dist cache hit failed')
-      - name: Test Cloudflare Workers
-        run: npm run test-cloudflare-workers
-        env:
-          CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
-          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
-      - run: git reset HEAD --hard
-
   test-electron:
     needs:
       - build
@@ -185,49 +131,11 @@ jobs:
         run: xvfb-maybe electron ./test/.electron
       - run: git reset HEAD --hard
 
-  test-browsers:
-    concurrency: test-browsers
-    if: ${{ !startsWith(github.event_name, 'pull_request') || (github.event_name == 'pull_request_target' && github.event.label.name == 'full-ci') }}
-    env:
-      BROWSERSTACK_USERNAME: ${{ secrets.BROWSERSTACK_USERNAME }}
-      BROWSERSTACK_ACCESS_KEY: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
-    needs:
-      - build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: denoland/setup-deno@v1
-        with:
-          deno-version: v1.x
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Setup node
-        uses: actions/setup-node@v3
-        with:
-          node-version: lts/hydrogen # 18
-      - name: Install dependencies
-        run: npm clean-install
-      - name: Load cached dist
-        uses: actions/cache@v3
-        id: dist
-        with:
-          path: dist
-          key: dist-${{ hashFiles('src/**/*.ts', 'tsconfig/*.json', '.github/workflows/*.yml', 'package.json') }}
-      - name: Abort if dist isn't cached
-        if: ${{ steps.dist.outputs.cache-hit != 'true' }}
-        uses: actions/github-script@v6
-        with:
-          script: |
-              core.setFailed('dist cache hit failed')
-      - run: npx retry-cli npm run test-browsers
-      - run: git reset HEAD --hard
-
   prepare-release:
     needs:
       - test
-      - test-browsers
       - test-electron
       - test-deno
-      - test-cloudflare
     runs-on: ubuntu-latest
     if: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags') && github.repository == 'panva/hkdf' }}
     steps:
