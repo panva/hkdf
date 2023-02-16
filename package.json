@@ -33,6 +33,7 @@
     ".": {
       "types": "./dist/types/index.d.ts",
       "browser": "./dist/web/index.js",
+      "worker": "./dist/web/index.js",
       "import": "./dist/node/esm/index.js",
       "require": "./dist/node/cjs/index.js"
     },
