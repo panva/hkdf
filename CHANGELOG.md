@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.0.3](https://github.com/panva/hkdf/compare/v1.0.2...v1.0.3) (2023-02-16)
+
+
+### Bug Fixes
+
+* add `worker` exports target ([#7](https://github.com/panva/hkdf/issues/7)) ([c554c6e](https://github.com/panva/hkdf/commit/c554c6e39a0ab38e008a1366b16c201c0f9da278))
+
 ## [1.0.2](https://github.com/panva/hkdf/compare/v1.0.1...v1.0.2) (2022-05-02)
 
 
