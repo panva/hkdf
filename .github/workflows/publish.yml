@@ -8,8 +8,6 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     continue-on-error: true
-    permissions:
-      id-token: write
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -37,8 +35,7 @@ jobs:
               core.setFailed('dist cache hit failed')
       - name: Prepare distribution
         run: node tools/publish-universal
-      - run: npm install -g npm
-      - run: npm publish --provenance --access public
+      - run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
@@ -46,8 +43,6 @@ jobs:
     needs:
       - publish
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -56,7 +51,7 @@ jobs:
       - run: git push origin $GITHUB_SHA:v1.x
       - run: git rm -r dist/**/*
       - run: |
-          git config --local user.name "github-actions[bot]"
-          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.email "panva.ip@gmail.com"
+          git config --local user.name "Filip Skokan"
           git commit -m "chore: cleanup after publish"
       - run: git push origin HEAD:main
