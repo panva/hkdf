@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.1.1](https://github.com/panva/hkdf/compare/v1.1.0...v1.1.1) (2023-04-26)
+
+
+### Bug Fixes
+
+* remove deno/README.md from published tarball ([5ab56e9](https://github.com/panva/hkdf/commit/5ab56e96db2f0ff69819d5788f2f0acb1e57bb54))
+
 ## [1.1.0](https://github.com/panva/hkdf/compare/v1.0.4...v1.1.0) (2023-04-26)
 
 
