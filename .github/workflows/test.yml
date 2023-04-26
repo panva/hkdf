@@ -1,40 +1,15 @@
-name: Continuous Integration
+name: Test
 
 on:
   push:
     branches: [main]
-    tags: ['v[0-9]+.[0-9]+.[0-9]+']
   pull_request:
     branches: [main]
   workflow_dispatch:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Setup node
-        uses: actions/setup-node@v3
-        with:
-          node-version: lts/hydrogen # 18
-          check-latest: true
-          cache: 'npm'
-      - name: Install dependencies
-        run: npm clean-install
-      - name: Cache dist
-        uses: actions/cache@v3
-        id: dist
-        with:
-          path: dist
-          key: dist-${{ hashFiles('src/**/*.ts', 'tsconfig/*.json', '.github/workflows/*.yml', 'package.json') }}
-      - name: Build
-        run: |
-          sed -i -e "s/-i ''/-i/g" package.json
-          sed -i -e "s/gcp/cp/g" package.json
-          npm run build-all
-        if: ${{ steps.dist.outputs.cache-hit != 'true' }}
-      - run: git reset HEAD --hard
+    uses: ./.github/workflows/build.yml
 
   test:
     needs:
@@ -65,13 +40,8 @@ jobs:
         id: dist
         with:
           path: dist
-          key: dist-${{ hashFiles('src/**/*.ts', 'tsconfig/*.json', '.github/workflows/*.yml', 'package.json') }}
-      - name: Abort if dist isn't cached
-        if: ${{ steps.dist.outputs.cache-hit != 'true' }}
-        uses: actions/github-script@v6
-        with:
-          script: |
-              core.setFailed('dist cache hit failed')
+          key: ${{ needs.build.outputs.cache-key }}
+          fail-on-cache-miss: true
       - run: npm run test
 
   test-deno:
@@ -89,13 +59,8 @@ jobs:
         id: dist
         with:
           path: dist
-          key: dist-${{ hashFiles('src/**/*.ts', 'tsconfig/*.json', '.github/workflows/*.yml', 'package.json') }}
-      - name: Abort if dist isn't cached
-        if: ${{ steps.dist.outputs.cache-hit != 'true' }}
-        uses: actions/github-script@v6
-        with:
-          script: |
-              core.setFailed('dist cache hit failed')
+          key: ${{ needs.build.outputs.cache-key }}
+          fail-on-cache-miss: true
       - name: Test Deno Definitions
         run: npm run test-deno -- --no-run
       - name: Test Deno
@@ -122,35 +87,10 @@ jobs:
         id: dist
         with:
           path: dist
-          key: dist-${{ hashFiles('src/**/*.ts', 'tsconfig/*.json', '.github/workflows/*.yml', 'package.json') }}
-      - name: Abort if dist isn't cached
-        if: ${{ steps.dist.outputs.cache-hit != 'true' }}
-        uses: actions/github-script@v6
-        with:
-          script: |
-              core.setFailed('dist cache hit failed')
+          key: ${{ needs.build.outputs.cache-key }}
+          fail-on-cache-miss: true
       - name: Install Electron
         run: npm install --global xvfb-maybe electron@latest
       - name: Test Electron crypto
         run: xvfb-maybe electron ./test/.electron
       - run: git reset HEAD --hard
-
-  prepare-release:
-    needs:
-      - test
-      - test-electron
-      - test-deno
-    runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags') && github.repository == 'panva/hkdf' }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 2
-      - name: Setup node
-        uses: actions/setup-node@v3
-        with:
-          node-version: lts/hydrogen # 18
-      - run: node tools/release-notes
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
