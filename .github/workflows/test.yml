@@ -32,7 +32,10 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
+          cache: 'npm'
           check-latest: true
+      - run: npm install --global npm@8
+        if: ${{ startsWith(steps.node.outputs.node-version, 'v12') || startsWith(steps.node.outputs.node-version, 'v14') }}
       - name: Install dependencies
         run: npm clean-install
       - name: Load cached dist
@@ -78,7 +81,6 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: lts/hydrogen # 18
-          check-latest: true
           cache: 'npm'
       - name: Install dependencies
         run: npm clean-install
