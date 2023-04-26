@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.1.0](https://github.com/panva/hkdf/compare/v1.0.4...v1.1.0) (2023-04-26)
+
+
+### Features
+
+* release process with provenance ([0ca439c](https://github.com/panva/hkdf/commit/0ca439c9a431f6ec1337fdf73d4967ccc30cb6e9))
+
 ## [1.0.4](https://github.com/panva/hkdf/compare/v1.0.3...v1.0.4) (2023-02-16)
 
 
