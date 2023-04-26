@@ -46,7 +46,8 @@
     "dist/**/package.json",
     "dist/**/*.js",
     "dist/types/**/*.d.ts",
-    "!dist/types/runtime/*"
+    "!dist/types/runtime/*",
+    "!dist/deno/**/*"
   ],
   "scripts": {
     "build": "tsc",
