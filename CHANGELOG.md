@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.2.0](https://github.com/panva/hkdf/compare/v1.1.1...v1.2.0) (2024-06-18)
+
+
+### Features
+
+* add bun, deno, and workerd package.json targets ([d8a424c](https://github.com/panva/hkdf/commit/d8a424cf6a97bb9a0b06cce58caa95c723f84adf))
+
 ## [1.1.1](https://github.com/panva/hkdf/compare/v1.1.0...v1.1.1) (2023-04-26)
 
 
