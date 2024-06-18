@@ -32,8 +32,11 @@
   "exports": {
     ".": {
       "types": "./dist/types/index.d.ts",
+      "bun": "./dist/web/index.js",
+      "deno": "./dist/web/index.js",
       "browser": "./dist/web/index.js",
       "worker": "./dist/web/index.js",
+      "workerd": "./dist/web/index.js",
       "import": "./dist/node/esm/index.js",
       "require": "./dist/node/cjs/index.js"
     },
