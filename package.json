@@ -55,11 +55,11 @@
   "scripts": {
     "build": "tsc",
     "build-all": "run-s clear build:*",
-    "build:web": "run-s runtime-web 'build -- -p ./tsconfig/web.json' && echo '{\"type\": \"module\"}'> dist/web/package.json",
+    "build:web": "run-s runtime-web 'build -- -p ./tsconfig/web.json' && echo '{\"type\":\"module\",\"sideEffects\":false}'> dist/web/package.json",
     "build:deno": "npm run-script runtime-deno && find dist/deno -name '*.ts' -type f -print0 | xargs -0 sed -i '' -e \"s/@deno\\-expect\\-error/@ts-ignore/g\" -e \"s/\\.js'/.ts'/g\" -e \"s/\\.d'/.d.ts'/g\"",
     "build:types": "npm run-script build -- -p ./tsconfig/types.json && cd src && find . -name '*.d.ts' -maxdepth 2 -type f -exec gcp --parents \"{}\" ../dist/types  \\; && cd ..  && run-s -s types:find | xargs -0 sed -i '' -e \"s/\\.js'/'/g\" -e \"s/\\.d'/'/g\"",
     "build:node-cjs": "run-s runtime-node 'build -- -p ./tsconfig/node-cjs.json'",
-    "build:node-esm": "run-s runtime-node 'build -- -p ./tsconfig/node-esm.json' && echo '{\"type\": \"module\"}'> dist/node/esm/package.json",
+    "build:node-esm": "run-s runtime-node 'build -- -p ./tsconfig/node-esm.json' && echo '{\"type\":\"module\",\"sideEffects\":false}'> dist/node/esm/package.json",
     "clear": "rm -rf dist",
     "runtime-web": "run-s runtime:clear runtime:web:*",
     "runtime-deno": "npm run-script runtime-web && mkdir -p dist/deno && cp -r src/. dist/deno && rm -r dist/deno/runtime/web dist/deno/runtime/node",
