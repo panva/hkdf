@@ -11,18 +11,24 @@ jobs:
   build:
     uses: ./.github/workflows/build.yml
 
+  node-versions:
+    name: Get Node.js Versions
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.query.outputs.matrix }}
+    steps:
+      - id: query
+        run: |
+          echo "matrix=$(curl -s https://raw.githubusercontent.com/actions/node-versions/refs/heads/main/versions-manifest.json | jq -c '[.[] | select(.lts) | select(.version | split(".")[0] | tonumber >= 14) | .lts | ascii_downcase | "lts/\(.)"] + ["current"] | unique')" >> "$GITHUB_OUTPUT"
+
   test:
     needs:
       - build
-    continue-on-error: ${{ !startsWith(matrix.node-version, 'lts') }}
+      - node-versions
     strategy:
       fail-fast: false
       matrix:
-        node-version:
-          - lts/fermium # 14
-          - lts/gallium # 16
-          - lts/hydrogen # 18
-          - current
+        node-version: ${{ fromJSON(needs.node-versions.outputs.matrix) }}
 
     runs-on: ubuntu-latest
     steps:
@@ -81,7 +87,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v4
         with:
-          node-version: lts/hydrogen # 18
+          node-version: lts/*
           cache: 'npm'
       - name: Install dependencies
         run: npm clean-install
