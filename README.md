@@ -1,3 +1,25 @@
+> [!IMPORTANT]
+> This project is now archived. The functionality provided here is no longer necessary, as the Web Cryptography API is now widely supported across all major and modern JavaScript runtimes and you may just use the following
+> ```ts
+> let ikm!: Uint8Array
+> let salt!: Uint8Array
+> let info!: Uint8Array
+> let keyLen!: number
+>
+> const derivedKey = new Uint8Array(
+>   await globalThis.crypto.subtle.deriveBits(
+>     {
+>       name: 'HKDF',
+>       hash: 'SHA-256',
+>       salt,
+>       info,
+>     },
+>     await globalThis.crypto.subtle.importKey('raw', ikm, 'HKDF', false, ['deriveBits']),
+>     keylen << 3,
+>   ),
+> )
+> ```
+
 # hkdf
 
 > HKDF with no dependencies using runtime's native crypto
